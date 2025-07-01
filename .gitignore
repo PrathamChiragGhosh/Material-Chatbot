@@ -1,9 +1,3 @@
-# ChromaDB and Database Files
-chroma_db_material/
-*.sqlite3
-*.db
-*.sqlite
-
 # Virtual Environment
 venv/
 .venv/

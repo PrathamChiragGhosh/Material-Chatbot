@@ -1,0 +1,13 @@
+Flask
+Flask-CORS
+langchain
+langchain-groq
+chromadb
+sentence-transformers
+pypdf
+python-dotenv
+pandas
+numpy
+python-dateutil
+PyMuPDF
+Pillow
