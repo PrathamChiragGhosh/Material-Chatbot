@@ -1,0 +1,70 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+.env/
+*venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ChromaDB and Database Files
+chroma_db_material/
+*.sqlite3
+*.db
+*.sqlite
+
+# PyTorch and ML Models
+*.pth
+*.pkl
+*.joblib
+
+# Flask
+instance/
+.webassets-cache
+
+# Environment variables
+.env
+.flaskenv
+
+# User data (your CSV files should be in gitignore too)
+user_data/
+uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
