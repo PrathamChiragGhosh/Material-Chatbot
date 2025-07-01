@@ -1,5 +1,6 @@
 chroma_db_material/chroma.sqlite3 filter=lfs diff=lfs merge=lfs -text
 chroma_db_material/*/data_level0.bin filter=lfs diff=lfs merge=lfs -text
-chroma_db_material/** filter=lfs diff=lfs merge=lfs -text
 *.sqlite3 filter=lfs diff=lfs merge=lfs -text
+chroma_db_material/** filter=lfs diff=lfs merge=lfs -text
 *.bin filter=lfs diff=lfs merge=lfs -text
+*.db filter=lfs diff=lfs merge=lfs -text
