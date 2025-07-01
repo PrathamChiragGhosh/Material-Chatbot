@@ -1,4 +1,23 @@
 import os
+import warnings
+import sys
+
+# Comprehensive environment setup to suppress all warnings and errors
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logging
+os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
+
+# Suppress Python warnings
+warnings.filterwarnings('ignore')
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+
+# Suppress ChromaDB telemetry completely
+os.environ['ANONYMIZED_TELEMETRY'] = 'False'
+os.environ['CHROMA_TELEMETRY'] = 'False'
+
 import sqlite3
 import csv
 import hashlib
@@ -12,6 +31,11 @@ import re
 
 from flask import Flask, request, jsonify, render_template, url_for, redirect, session, flash, send_from_directory
 from flask_cors import CORS
+
+# Suppress specific library warnings
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader, CSVLoader
 from langchain_community.vectorstores import Chroma
@@ -22,7 +46,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this-in-production'
-CORS(app, supports_credentials=True)  # Enable credentials for CORS
+CORS(app, supports_credentials=True)
 
 # Configure upload settings
 UPLOAD_FOLDER = 'uploads'
@@ -36,6 +60,8 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Ensure directories exist
 os.makedirs('data', exist_ok=True)
+os.makedirs('static', exist_ok=True)
+os.makedirs('templates', exist_ok=True)
 os.makedirs(PDF_FOLDER, exist_ok=True)
 os.makedirs(IMAGE_FOLDER, exist_ok=True)
 os.makedirs('user_data', exist_ok=True)
@@ -325,9 +351,30 @@ def initialize_components():
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         texts = text_splitter.split_documents(documents)
 
-        # Create embeddings and vector store
-        embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-        vector_db = Chroma.from_documents(texts, embeddings, persist_directory="./chroma_db_material")
+        # Create embeddings with full compatibility
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': False}
+        )
+        
+        # Create ChromaDB with telemetry completely disabled
+        import chromadb
+        from chromadb.config import Settings
+        
+        # Custom settings to disable all telemetry and prevent Windows warnings
+        chroma_settings = Settings(
+            anonymized_telemetry=False,
+            allow_reset=True,
+            persist_directory="./chroma_db_material"
+        )
+        
+        vector_db = Chroma.from_documents(
+            texts, 
+            embeddings, 
+            persist_directory="./chroma_db_material",
+            client_settings=chroma_settings
+        )
 
         # Create LLM
         llm = ChatGroq(
@@ -442,7 +489,7 @@ qa_chain = initialize_components()
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        identifier = request.form['username'].strip()  # Can be username or email
+        identifier = request.form['username'].strip()
         password = request.form['password']
         
         user = get_user_by_username_or_email(identifier)
@@ -465,7 +512,6 @@ def register():
         password = request.form['password']
         full_name = request.form['full_name'].strip()
         
-        # Check if username already exists
         if get_user_by_username_or_email(username) or get_user_by_username_or_email(email):
             flash('Username or email already exists')
             return render_template('register.html')
@@ -506,16 +552,14 @@ def upload_file():
             filename = secure_filename(file.filename)
             file_type = filename.rsplit('.', 1)[1].lower()
             
-            # Choose the appropriate folder based on file type
             if file_type == 'pdf':
                 save_folder = PDF_FOLDER
-            else:  # image files
+            else:
                 save_folder = IMAGE_FOLDER
                 
             file_path = os.path.join(save_folder, filename)
             file.save(file_path)
             
-            # Process the file based on its type
             analysis_result = {}
             if file_type == 'pdf':
                 extracted_text = extract_text_from_pdf(file_path)
@@ -526,7 +570,6 @@ def upload_file():
             else:
                 analysis_result = analyze_image_for_compliance(file_path)
             
-            # Store file info in database
             conn = sqlite3.connect('material_specification_chat.db')
             cursor = conn.cursor()
             cursor.execute('''
@@ -562,7 +605,6 @@ def chat():
         if not user_message:
             return jsonify({"bot_response": "Please enter a valid material specification question"})
 
-        # Check for file references
         file_references = re.findall(r"file:([a-zA-Z0-9_\-\.]+)", user_message)
         
         if file_references:
@@ -583,7 +625,6 @@ def chat():
             
             conn.close()
 
-        # Process with QA chain
         if qa_chain:
             result = qa_chain.invoke({"query": user_message})
             bot_response = validate_response(result)
@@ -593,7 +634,6 @@ def chat():
         response_time = (datetime.now() - start_time).total_seconds()
         store_conversation(session_id, user_message, bot_response, response_time)
         
-        # Log to CSV
         log_chat_interaction(
             session.get('user_id'),
             session.get('username'),
@@ -664,7 +704,8 @@ def get_stats():
         total_materials = cursor.fetchone()
 
         cursor.execute("SELECT AVG(response_time) FROM conversations WHERE response_time > 0")
-        avg_response_time = cursor.fetchone() or 0
+        avg_response_result = cursor.fetchone()
+        avg_response_time = avg_response_result if avg_response_result else 0
 
         conn.close()
 
@@ -672,7 +713,7 @@ def get_stats():
             "total_conversations": total_conversations,
             "total_sessions": total_sessions,
             "total_materials": total_materials,
-            "avg_response_time": round(avg_response_time, 2)
+            "avg_response_time": round(avg_response_time, 2) if avg_response_time else 0
         })
     except Exception as e:
         return jsonify({
