@@ -1,0 +1,209 @@
+# MATERIAL STANDARDS AND SPECIFICATIONS REFERENCE
+
+## ASTM INTERNATIONAL STANDARDS
+
+### Carbon Steel Standards
+ASTM A36 - Standard Specification for Carbon Structural Steel
+- Minimum yield strength: 250 MPa (36 ksi)
+- Tensile strength: 400-550 MPa (58-80 ksi)
+- Applications: Structural steel, bridges, buildings
+- Chemical composition: C ≤ 0.26%, Mn ≤ 1.35%, P ≤ 0.04%, S ≤ 0.05%
+
+ASTM A106 - Standard Specification for Seamless Carbon Steel Pipe
+- Grades: A, B, C with increasing strength requirements
+- Grade B: Yield strength 240 MPa, Tensile strength 415 MPa minimum
+- Applications: High-temperature service, boilers, superheaters
+- Chemical composition: C ≤ 0.30%, Mn 0.29-1.06%, P ≤ 0.035%, S ≤ 0.035%
+
+ASTM A516 - Standard Specification for Pressure Vessel Plates
+- Grades: 55, 60, 65, 70 (indicating minimum tensile strength in ksi)
+- Grade 70: Yield strength 260 MPa, Tensile strength 485-620 MPa
+- Applications: Pressure vessels, boilers, storage tanks
+- Normalized heat treatment for improved toughness
+
+ASTM A53 - Standard Specification for Pipe, Steel, Black and Hot-Dipped
+- Types: F (furnace welded), E (electric resistance welded), S (seamless)
+- Grades: A and B with different strength requirements
+- Applications: Water, gas, air, steam lines
+- Galvanized coating available for corrosion protection
+
+### Stainless Steel Standards
+ASTM A240 - Standard Specification for Chromium and Chromium-Nickel Stainless Steel Plate
+- Covers austenitic, ferritic, martensitic, and duplex grades
+- Grade 316L: Low carbon version of 316 for improved corrosion resistance
+- Grade 304: General purpose austenitic grade, 18% Cr, 8% Ni
+- Applications: Chemical processing, food service, marine environments
+
+ASTM A312 - Standard Specification for Seamless, Welded, and Heavily Cold Worked Stainless Steel Pipes
+- Austenitic grades including 304, 304L, 316, 316L, 321, 347
+- Solution annealed and pickled condition
+- Applications: High-temperature and corrosive service
+- Hydrostatic testing required for seamless pipes
+
+ASTM A276 - Standard Specification for Stainless Steel Bars and Shapes
+- Hot-finished and cold-finished bars
+- Includes all standard austenitic, ferritic, and martensitic grades
+- Condition A (annealed), Condition B (strain hardened)
+- Applications: Fasteners, shafts, fittings, machined components
+
+### Aluminum Standards
+ASTM B209 - Standard Specification for Aluminum and Aluminum-Alloy Sheet and Plate
+- Alloys: 1100, 3003, 5052, 6061, 7075 and many others
+- Temper designations: O (annealed), H (strain hardened), T (heat treated)
+- Applications: Aircraft, marine, architectural, automotive
+- Minimum mechanical properties specified for each alloy/temper combination
+
+ASTM B221 - Standard Specification for Aluminum and Aluminum-Alloy Extruded Bars, Rods, Wire, Profiles, and Tubes
+- Covers structural shapes, bars, rods, and tubes
+- Heat treatable and non-heat treatable alloys
+- T6 temper: Solution heat treated and artificially aged
+- Applications: Structural framing, machined components, heat sinks
+
+## ASME BOILER AND PRESSURE VESSEL CODE
+
+### Section II - Materials
+Part A: Ferrous Material Specifications
+- SA-36: Carbon structural steel (same as ASTM A36)
+- SA-106: Seamless carbon steel pipe for high-temperature service
+- SA-516: Carbon steel plates for pressure vessels
+- SA-240: Stainless steel plates, sheets, and strips
+
+Part B: Nonferrous Material Specifications
+- SB-209: Aluminum and aluminum-alloy sheet and plate
+- SB-443: Nickel-chromium-molybdenum-columbium alloy pipe and tube
+- SB-575: Nickel-molybdenum-chromium alloys plate, sheet, and strip
+
+Part C: Specifications for Welding Rods, Electrodes, and Filler Metals
+- Covers welding consumables for various base materials
+- Classification system for electrode selection
+- Matching filler metals for dissimilar material welding
+
+Part D: Properties (Customary)
+- Allowable stress values for materials at various temperatures
+- Temperature-dependent properties for design calculations
+- Creep and stress rupture data for high-temperature applications
+
+### Section VIII - Pressure Vessels
+Division 1: Rules for Construction of Pressure Vessels
+- Design by rule methodology
+- Material requirements and allowable stresses
+- Fabrication, examination, and testing requirements
+- Stamping and certification procedures
+
+Division 2: Alternative Rules for Construction of Pressure Vessels
+- Design by analysis methodology
+- Higher allowable stresses with additional requirements
+- Fatigue analysis for cyclic loading
+- Fracture mechanics considerations
+
+## API AMERICAN PETROLEUM INSTITUTE STANDARDS
+
+### API 5L - Specification for Line Pipe
+- Grades: A25, A, B, X42, X46, X52, X56, X60, X65, X70, X80
+- Product specification levels: PSL1 and PSL2
+- Applications: Oil and gas transmission pipelines
+- Supplementary requirements for sour service, offshore applications
+
+### API 5CT - Specification for Casing and Tubing
+- Grades: H40, J55, K55, N80, L80, C90, T95, P110, Q125
+- Applications: Oil and gas well casing and tubing
+- Connections: Threaded and coupled, integral joint
+- Special requirements for corrosive environments
+
+### API 6A - Specification for Wellhead and Christmas Tree Equipment
+- Pressure classes: 2000, 3000, 5000, 10000, 15000, 20000 psi
+- Temperature classes: K, L, P, R, S, T, U
+- Materials: Carbon steel, low alloy steel, stainless steel
+- Testing requirements: Pressure testing, non-destructive examination
+
+## QUALITY CONTROL AND TESTING STANDARDS
+
+### Non-Destructive Testing (NDT)
+ASTM E165 - Standard Practice for Liquid Penetrant Examination
+- Surface defect detection method
+- Applicable to non-porous materials
+- Sensitivity levels I, II, III, IV
+- Post-cleaning and evaluation procedures
+
+ASTM E709 - Standard Guide for Magnetic Particle Testing
+- Ferromagnetic material inspection
+- Dry powder and wet suspension methods
+- AC and DC magnetization techniques
+- Defect acceptance criteria
+
+ASTM E164 - Standard Practice for Contact Ultrasonic Testing
+- Volumetric defect detection
+- Longitudinal and shear wave techniques
+- Calibration with reference standards
+- Thickness measurement capabilities
+
+### Chemical Analysis
+ASTM E415 - Standard Test Method for Analysis of Carbon and Low-Alloy Steel
+- Optical emission spectroscopy
+- X-ray fluorescence spectroscopy
+- Combustion analysis for carbon and sulfur
+- Accuracy and precision requirements
+
+### Mechanical Testing
+ASTM E8 - Standard Test Methods for Tension Testing of Metallic Materials
+- Room temperature testing procedures
+- Specimen preparation and dimensions
+- Yield strength, tensile strength, elongation determination
+- Reporting requirements and calculations
+
+ASTM E23 - Standard Test Methods for Notched Bar Impact Testing
+- Charpy V-notch and Izod test methods
+- Impact energy absorption measurement
+- Temperature control for transition temperature determination
+- Specimen preparation and testing procedures
+
+## POSITIVE MATERIAL IDENTIFICATION (PMI)
+
+### XRF Spectroscopy for Alloy Verification
+- Non-destructive chemical composition analysis
+- Portable analyzers for field verification
+- Accuracy: ±0.1% for major elements, ±0.01% for trace elements
+- Calibration with certified reference materials
+
+### PMI Procedures for Critical Applications
+- Nuclear power plant components
+- Pressure vessel and piping systems
+- Aerospace and defense applications
+- Medical device manufacturing
+
+## MATERIAL TRACEABILITY REQUIREMENTS
+
+### Heat Number Tracking
+- Unique identifier for each heat of material
+- Links material to chemical composition and mechanical properties
+- Required for pressure vessel and piping applications
+- Maintained throughout fabrication and installation
+
+### Mill Test Certificates (MTC)
+- EN 10204 Type 3.1: Manufacturer's certificate
+- EN 10204 Type 3.2: Manufacturer's certificate with independent verification
+- Chemical composition and mechanical property verification
+- Authorized signature and official stamp requirements
+
+### Chain of Custody Documentation
+- Material receiving inspection reports
+- Storage and handling procedures
+- Fabrication traceability records
+- Installation and commissioning documentation
+
+## COMPLIANCE AND CERTIFICATION
+
+### Third-Party Inspection
+- American Bureau of Shipping (ABS)
+- Lloyd's Register (LR)
+- Det Norske Veritas (DNV)
+- Bureau Veritas (BV)
+- Quality assurance and compliance verification
+
+### Material Certification Programs
+- NACE International corrosion specialist certification
+- AWS welding inspector certification
+- ASNT NDT personnel certification
+- API inspector certification programs
+
+This comprehensive standards reference provides the foundation for material specification identification, procurement procedures, and quality control requirements across multiple industries including oil and gas, petrochemical, power generation, and general manufacturing applications.

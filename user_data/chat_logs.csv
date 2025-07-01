@@ -1,0 +1,63 @@
+log_id,user_id,username,user_message,bot_response,timestamp,session_id
+20250701120821842703,202507011138281,Zboat27,List materials with delivery delays,"## Material Delivery Delay Status
+To determine if there are any materials with delivery delays, we need to compare the **Order_Date** and **Delivery_Date** with the current date.
+
+### Current Date: 2025-07-01
+### Material Information:
+| Material_ID | Category | Grade | Form | Delivery_Date | Delay Status |
+| --- | --- | --- | --- | --- | --- |
+| MAT-0077 | Aluminum | 3003-H14 | Sheet | 2025-05-31 | Delayed |
+
+## Delayed Materials:
+- **MAT-0077**: Aluminum 3003-H14 Sheet, with a **Delivery_Date** of 2025-05-31, is currently delayed since the current date (2025-07-01) is past the expected delivery date.
+
+## Recommendations:
+1. Verify the status of **MAT-0077** with the supplier, **ThyssenKrupp**.
+2. Contact the buyer, **John Smith**, to inform them of the delay.
+3. Review the **WO_Number**: WO-2024-2751, **MR_Number**: MR-2024-652, **PR_Number**: PR-2024-19986, and **RFQ_Number**: RFQ-2024-5368 for any updates or changes.",2025-07-01T12:08:21.842703,session_1750928264094_jh75dxogs
+20250701120829258002,202507011138281,Zboat27,What materials are currently pending approval?,"## Material Approval Status
+There is no information provided about materials pending approval. The provided data only includes details about **Material_ID: MAT-0087**, which has a **Status: Delivered**. 
+
+### Available Information
+The available information includes:
+- **Material_ID**: MAT-0087
+- **Category**: Aluminum
+- **Grade**: 2024-T4
+- **Form**: Sheet
+- **Specification**: **ASTM B211**
+- **Status**: Delivered
+
+### Pending Approval Inquiry
+To inquire about materials pending approval, please provide more context or details about the specific materials you are interested in. I can assist with:
+- Material identification
+- Procurement processes
+- Work orders (WO)
+- Material requests (MR)
+- Purchase requests (PR)
+- RFQ processes
+- Supply chain management
+
+If you have any specific questions about **Material_ID: MAT-0087** or any other material-related inquiries, feel free to ask.",2025-07-01T12:08:29.258002,session_1750928264094_jh75dxogs
+20250701120857817014,202507011138281,Zboat27,What materials are currently pending approval?,"## Material Approval Status
+There is no information provided about materials pending approval. The provided data only includes details about **Material_ID: MAT-0087**, which has a **Status: Delivered**. 
+
+### Available Information
+The available information includes:
+- **Material_ID**: MAT-0087
+- **Category**: Aluminum
+- **Grade**: 2024-T4
+- **Form**: Sheet
+- **Specification**: **ASTM B211**
+- **Status**: Delivered
+
+### Pending Approval Inquiry
+To inquire about materials pending approval, please provide more context or details about the specific materials you are interested in. I can assist with:
+- Material identification
+- Procurement processes
+- Work orders (WO)
+- Material requests (MR)
+- Purchase requests (PR)
+- RFQ processes
+- Supply chain management
+
+If you have any specific questions about **Material_ID: MAT-0087** or any other material-related inquiries, feel free to ask.",2025-07-01T12:08:57.817014,session_1751357336619_d3ldqretc

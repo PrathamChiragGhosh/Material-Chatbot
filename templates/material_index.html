@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Material Specification Chatbot</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Markdown parsing and security -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.7/dist/purify.min.js"></script>
+    
+    <!-- Code syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0c2c34 0%, #1e303c 50%, #05aff6 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: rgba(12, 44, 52, 0.9);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(5, 175, 246, 0.3);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .sidebar h3 {
+            color: #05aff6;
+            margin-bottom: 20px;
+            font-size: 18px;
+            text-align: center;
+            border-bottom: 2px solid #05aff6;
+            padding-bottom: 10px;
+        }
+        
+        .stats-card {
+            background: rgba(30, 48, 60, 0.8);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #05aff6;
+        }
+        
+        .stats-card h4 {
+            color: #90defc;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card .value {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .quick-actions {
+            margin-top: 20px;
+        }
+        
+        .quick-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #05aff6, #0c2c34);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(5, 175, 246, 0.4);
+        }
+        
+        /* Main Chat Area */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(5, 175, 246, 0.3);
+        }
+        
+        .chat-header {
+            background: linear-gradient(45deg, #0c2c34, #05aff6);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .chat-header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .chat-header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .chat-header .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #90defc;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .chat-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #0c2c34;
+            max-height: 500px;
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            max-width: 80%;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            background: linear-gradient(45deg, #05aff6, #90defc);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 20px 20px 5px 20px;
+            margin-left: auto;
+            box-shadow: 0 4px 12px rgba(5, 175, 246, 0.3);
+        }
+        
+        .bot-message {
+            background: linear-gradient(45deg, #ffffff, #f8f9fa);
+            color: #0c2c34;
+            padding: 15px 20px;
+            border-radius: 20px 20px 20px 5px;
+            margin-right: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #05aff6;
+        }
+        
+        /* Enhanced Markdown Styles for Bot Messages */
+        .bot-message h1, .bot-message h2, .bot-message h3, .bot-message h4 {
+            color: #0c2c34;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+        
+        .bot-message h1 {
+            font-size: 24px;
+            border-bottom: 2px solid #05aff6;
+            padding-bottom: 5px;
+        }
+        
+        .bot-message h2 {
+            font-size: 20px;
+            border-bottom: 1px solid #05aff6;
+            padding-bottom: 3px;
+        }
+        
+        .bot-message h3 {
+            font-size: 18px;
+            color: #0c2c34;
+        }
+        
+        .bot-message h4 {
+            font-size: 16px;
+            color: #0c2c34;
+        }
+        
+        .bot-message ul, .bot-message ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        .bot-message li {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        
+        .bot-message code {
+            background: rgba(5, 175, 246, 0.1);
+            color: #0c2c34;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .bot-message pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .bot-message pre code {
+            background: none;
+            padding: 0;
+            border-radius: 0;
+        }
+        
+        .bot-message table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 15px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .bot-message th, .bot-message td {
+            border: 1px solid #e9ecef;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        
+        .bot-message th {
+            background: rgba(5, 175, 246, 0.1);
+            font-weight: 600;
+            color: #0c2c34;
+        }
+        
+        .bot-message strong {
+            color: #0c2c34;
+            font-weight: 600;
+        }
+        
+        .bot-message blockquote {
+            border-left: 4px solid #05aff6;
+            margin: 15px 0;
+            padding: 10px 15px;
+            background: rgba(5, 175, 246, 0.05);
+            font-style: italic;
+        }
+        
+        .message-meta {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            margin-right: auto;
+            max-width: 100px;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #05aff6;
+            animation: typing 1.5s infinite;
+            margin: 0 2px;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 20px;
+            background: rgba(12, 44, 52, 0.05);
+            border-top: 1px solid rgba(5, 175, 246, 0.2);
+            gap: 10px;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid rgba(5, 175, 246, 0.3);
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: #0c2c34;
+            transition: all 0.3s ease;
+        }
+        
+        #user-input:focus {
+            border-color: #05aff6;
+            box-shadow: 0 0 20px rgba(5, 175, 246, 0.3);
+        }
+        
+        #send-button {
+            background: linear-gradient(45deg, #05aff6, #0c2c34);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 15px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        #send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 175, 246, 0.4);
+        }
+        
+        #send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+        }
+        
+        .connected {
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+        }
+        
+        .disconnected {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            background: rgba(12, 44, 52, 0.1);
+            color: #0c2c34;
+            font-size: 14px;
+            border-top: 1px solid rgba(5, 175, 246, 0.2);
+        }
+        
+        .material-info {
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #05aff6;
+            color: #0c2c34;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .info-item strong {
+            color: #0c2c34;
+        }
+        
+        /* File Upload Area */
+        .file-upload-area {
+            border: 2px dashed #05aff6;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            background: linear-gradient(135deg, rgba(5, 175, 246, 0.05), rgba(12, 44, 52, 0.05));
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #0c2c34;
+            background: linear-gradient(135deg, rgba(5, 175, 246, 0.1), rgba(12, 44, 52, 0.1));
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #0c2c34;
+            background: linear-gradient(135deg, rgba(5, 175, 246, 0.15), rgba(12, 44, 52, 0.15));
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #05aff6;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: #0c2c34;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-progress {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #05aff6, #0c2c34);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .uploaded-files {
+            margin-top: 20px;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(5, 175, 246, 0.1);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .file-icon {
+            margin-right: 10px;
+            color: #05aff6;
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            color: #0c2c34;
+        }
+        
+        .file-status {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .sidebar {
+                position: static;
+                margin-bottom: 20px;
+            }
+            
+            .chat-header h1 {
+                font-size: 24px;
+            }
+            
+            .input-area {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            #send-button {
+                width: 100%;
+            }
+            
+            .file-upload-area {
+                padding: 20px;
+            }
+            
+            .upload-icon {
+                font-size: 36px;
+            }
+            
+            .upload-text {
+                font-size: 14px;
+            }
+        }
+        
+        /* Scrollbar Styling */
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .chat-area::-webkit-scrollbar-thumb {
+            background: #05aff6;
+            border-radius: 4px;
+        }
+        
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: #0c2c34;
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status connected" id="connection-status">
+        <i class="fas fa-circle"></i> Connected
+    </div>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3><i class="fas fa-chart-bar"></i> System Dashboard</h3>
+            
+            <div class="stats-card">
+                <h4>Total Conversations</h4>
+                <div class="value" id="total-conversations">0</div>
+            </div>
+            
+            <div class="stats-card">
+                <h4>Avg Response Time</h4>
+                <div class="value" id="avg-response-time">0s</div>
+            </div>
+            
+            <div class="stats-card">
+                <h4>Files Processed</h4>
+                <div class="value" id="total-files">0</div>
+            </div>
+            
+            <div class="quick-actions">
+                <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <button class="quick-btn" onclick="askQuickQuestion('What materials are currently pending approval?')">
+                    <i class="fas fa-clock"></i> Pending Materials
+                </button>
+                <button class="quick-btn" onclick="askQuickQuestion('Show me material standards for steel pipes')">
+                    <i class="fas fa-book"></i> Standards Check
+                </button>
+                <button class="quick-btn" onclick="askQuickQuestion('List materials with delivery delays')">
+                    <i class="fas fa-exclamation-triangle"></i> Delayed Deliveries
+                </button>
+                <button class="quick-btn" onclick="document.getElementById('file-input').click()">
+                    <i class="fas fa-upload"></i> Upload Document
+                </button>
+            </div>
+            
+            <div class="material-info">
+                <h4><i class="fas fa-info-circle"></i> Material Types</h4>
+                <div class="info-grid">
+                    <div class="info-item"><strong>WO:</strong> Work Orders</div>
+                    <div class="info-item"><strong>MR:</strong> Material Requests</div>
+                    <div class="info-item"><strong>PR:</strong> Purchase Requests</div>
+                    <div class="info-item"><strong>RFQ:</strong> Request for Quotation</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Chat Area -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="icon">
+                    <i class="fas fa-industry"></i>
+                </div>
+                <h1>Enhanced Material Specification Assistant</h1>
+                <div class="subtitle">AI-Powered Material Management with Professional Formatted Responses</div>
+            </div>
+            
+            <!-- File Upload Area -->
+            <div class="file-upload-area" onclick="document.getElementById('file-input').click()" 
+                 ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">
+                    <strong>Upload PDF or Image for Standards Compliance Check</strong>
+                </div>
+                <div class="upload-subtext">
+                    Drag and drop files here or click to browse
+                </div>
+                <input type="file" id="file-input" class="file-input" accept=".pdf,.png,.jpg,.jpeg" onchange="handleFileSelect(event)">
+                
+                <div class="upload-progress" id="upload-progress">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
+            
+            <!-- Uploaded Files Display -->
+            <div class="uploaded-files" id="uploaded-files"></div>
+            
+            <div class="chat-area" id="chat-area">
+                <div class="bot-message message enhanced">
+                    <strong>Welcome to the Enhanced Material Specification System!</strong><br><br>
+                    I now provide <strong>ChatGPT/Copilot-style formatted responses</strong> with:
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>📋 <strong>Structured headers and sections</strong> for clear organization</li>
+                        <li>📄 <strong>Tables and lists</strong> for comparing materials and specifications</li>
+                        <li>🖼️ <strong>Code blocks</strong> for technical standards and specifications</li>
+                        <li>📊 <strong>Professional formatting</strong> matching industry AI assistants</li>
+                        <li>🔍 <strong>Enhanced readability</strong> for complex material data</li>
+                        <li>📚 <strong>Source citations</strong> from your material database</li>
+                    </ul>
+                    <br>
+                    Upload documents or ask questions about your materials!
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Ask about materials, upload files for analysis, or reference specific documents..." autocomplete="off">
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+            
+            <div class="footer">
+                <i class="fas fa-shield-alt"></i> Enhanced Security -  
+                <i class="fas fa-database"></i> Source Citations -  
+                <i class="fas fa-markdown"></i> Professional Formatting
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let uploadedFiles = [];
+        
+        // Utility function for HTML escaping
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+        
+        // File handling functions
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+        
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFile(files);
+            }
+        }
+        
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) {
+                uploadFile(e.target.files);
+            }
+        }
+        
+        function uploadFile(file) {
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Please upload only PDF or image files (PNG, JPG, JPEG)');
+                return;
+            }
+            
+            // Show progress
+            const progressContainer = document.getElementById('upload-progress');
+            const progressBar = document.getElementById('progress-bar');
+            progressContainer.style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('session_id', getSessionId());
+            
+            const xhr = new XMLHttpRequest();
+            
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                }
+            });
+            
+            xhr.onload = function() {
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+                
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        addFileToDisplay(response);
+                        showFileAnalysisResult(response);
+                        uploadedFiles.push(response);
+                        updateFileCount();
+                    } else {
+                        alert('Upload failed: ' + response.error);
+                    }
+                } else {
+                    alert('Upload failed. Please try again.');
+                }
+            };
+            
+            xhr.onerror = function() {
+                progressContainer.style.display = 'none';
+                alert('Upload failed. Please check your connection.');
+            };
+            
+            xhr.open('POST', '/upload');
+            xhr.withCredentials = true; // Include session cookie
+            xhr.send(formData);
+        }
+        
+        function addFileToDisplay(fileData) {
+            const filesContainer = document.getElementById('uploaded-files');
+            const fileElement = document.createElement('div');
+            fileElement.className = 'file-item';
+            
+            const fileType = fileData.file_type;
+            const iconClass = fileType === 'pdf' ? 'fa-file-pdf' : 'fa-image';
+            
+            fileElement.innerHTML = `
+                <i class="fas ${iconClass} file-icon"></i>
+                <div class="file-info">
+                    <div class="file-name">${fileData.file_name}</div>
+                    <div class="file-status">Uploaded and analyzed successfully</div>
+                </div>
+            `;
+            
+            filesContainer.appendChild(fileElement);
+        }
+        
+        function showFileAnalysisResult(fileData) {
+            const analysis = fileData.analysis_result;
+            let message = `## File Analysis Complete: ${fileData.file_name}\n\n`;
+            
+            if (fileData.file_type === 'pdf') {
+                message += `✅ **PDF processed successfully**\n`;
+                message += `📊 Text content extracted and indexed for search\n`;
+                if (analysis && analysis.warning) {
+                    message += `⚠️ ${analysis.warning}\n`;
+                }
+            } else {
+                // Image analysis results
+                if (analysis && analysis.compliant) {
+                    message += `✅ **Material appears compliant with standards**\n`;
+                } else if (analysis && analysis.issues && analysis.issues.length > 0) {
+                    message += `❌ **Potential compliance issues detected:**\n`;
+                    analysis.issues.forEach(issue => {
+                        message += `- ${issue}\n`;
+                    });
+                }
+                
+                if (analysis && analysis.metadata) {
+                    message += `\n📏 **Image dimensions:** ${analysis.metadata.dimensions}x${analysis.metadata.dimensions[1]}`;
+                }
+            }
+            
+            message += `\n\nYou can now reference this file in your questions using \`file:${fileData.file_name}\``;
+            
+            addMessage(message, 'bot');
+        }
+        
+        function updateFileCount() {
+            document.getElementById('total-files').textContent = uploadedFiles.length;
+        }
+        
+        // ENHANCED MESSAGE FUNCTION WITH MARKDOWN RENDERING
+        function addMessage(content, sender, responseTime = null, citations = null) {
+            const chatArea = document.getElementById('chat-area');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            if (sender === 'bot') messageDiv.classList.add('enhanced');
+            
+            let messageContent = content;
+            
+            // Process markdown for bot messages
+            if (sender === 'bot') {
+                // Configure marked.js options
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    sanitize: false, // We'll use DOMPurify instead
+                    highlight: function(code, lang) {
+                        if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                            try {
+                                return hljs.highlight(code, { language: lang }).value;
+                            } catch (err) {}
+                        }
+                        return typeof hljs !== 'undefined' ? hljs.highlightAuto(code).value : code;
+                    }
+                });
+                
+                // Parse markdown and sanitize for security
+                const rawHtml = marked.parse(messageContent);
+                messageContent = DOMPurify.sanitize(rawHtml);
+            }
+            
+            // Add citations if available
+            if (citations && citations.length > 0) {
+                messageContent += '<div class="citations">';
+                messageContent += '<div class="citation-title"><i class="fas fa-quote-left"></i> Sources:</div>';
+                citations.forEach((citation, index) => {
+                    messageContent += `
+                        <div class="citation-item">
+                            <div class="citation-source">[${citation.id}] ${citation.title}</div>
+                            <div class="citation-quote">"${citation.quote}"</div>
+                        </div>
+                    `;
+                });
+                messageContent += '</div>';
+            }
+            
+            // Add metadata and render
+            let metaInfo = '';
+            if (sender === 'bot' && responseTime) {
+                metaInfo = `<div class="message-meta">
+                    <i class="fas fa-robot"></i> AI Assistant -  Response time: ${responseTime}s -  ${new Date().toLocaleTimeString()}
+                </div>`;
+            } else if (sender === 'user') {
+                metaInfo = `<div class="message-meta">
+                    <i class="fas fa-user"></i> You -  ${new Date().toLocaleTimeString()}
+                </div>`;
+            }
+            
+            if (sender === 'bot') {
+                messageDiv.innerHTML = messageContent + metaInfo;
+            } else {
+                messageDiv.innerHTML = `<span>${escapeHtml(messageContent)}</span>` + metaInfo;
+            }
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Apply syntax highlighting
+            if (sender === 'bot' && typeof hljs !== 'undefined') {
+                messageDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+        }
+        
+        // Enhanced send message function
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            userInput.value = '';
+            
+            const sendButton = document.getElementById('send-button');
+            sendButton.disabled = true;
+            showTypingIndicator();
+            
+            fetch('/api/chat', {
+                method: 'POST',
+                credentials: 'include', // CRITICAL: Include session cookie
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: message,
+                    session_id: getSessionId()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideTypingIndicator();
+                addMessage(data.bot_response, 'bot', data.response_time, data.citations);
+                sendButton.disabled = false;
+                loadStats();
+            })
+            .catch(error => {
+                hideTypingIndicator();
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                sendButton.disabled = false;
+                updateConnectionStatus(false);
+                console.error('Error:', error);
+            });
+        }
+        
+        function getSessionId() {
+            let sessionId = localStorage.getItem('chatbot_session_id');
+            if (!sessionId) {
+                sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('chatbot_session_id', sessionId);
+            }
+            return sessionId;
+        }
+        
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'block';
+            document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
+        }
+        
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+        
+        function askQuickQuestion(question) {
+            document.getElementById('user-input').value = question;
+            sendMessage();
+        }
+        
+        function loadStats() {
+            fetch('/api/stats', {
+                credentials: 'include' // CRITICAL: Include session cookie
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-conversations').textContent = data.total_conversations || 0;
+                document.getElementById('avg-response-time').textContent = (data.avg_response_time || 0) + 's';
+                updateConnectionStatus(true);
+            })
+            .catch(error => {
+                updateConnectionStatus(false);
+                console.error('Stats loading error:', error);
+            });
+        }
+        
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            if (connected) {
+                statusElement.className = 'connection-status connected';
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> Connected';
+            } else {
+                statusElement.className = 'connection-status disconnected';
+                statusElement.innerHTML = '<i class="fas fa-circle"></i> Disconnected';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            document.getElementById('user-input').focus();
+            
+            // Auto-refresh stats every 30 seconds
+            setInterval(loadStats, 30000);
+        });
+    </script>
+</body>
+</html>
