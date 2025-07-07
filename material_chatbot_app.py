@@ -744,7 +744,7 @@ def initialize_components():
         # Create LLM
         llm = ChatGroq(
             temperature=0,
-            groq_api_key="your_actual_api_key_here",
+            groq_api_key="REDACTED_FOR_GITHUB",
             model_name="llama-3.3-70b-versatile"
         )
 
@@ -848,7 +848,7 @@ def initialize_electrical_components():
         # Create LLM (same API key)
         llm = ChatGroq(
             temperature=0,
-            groq_api_key="your_actual_api_key_here",
+            groq_api_key="REDACTED_FOR_GITHUB",
             model_name="llama-3.3-70b-versatile"
         )
 
