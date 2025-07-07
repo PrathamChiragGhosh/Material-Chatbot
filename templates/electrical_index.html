@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Specifications Assistant</title>
+    <title>Electrical Specifications Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             margin: 0;
@@ -33,7 +33,7 @@
         .top-navbar .brand {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #667eea;
+            color: #ffa726;
         }
 
         .user-section {
@@ -49,7 +49,7 @@
         }
 
         .logout-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -61,7 +61,7 @@
 
         .logout-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 167, 38, 0.4);
             color: white;
         }
 
@@ -90,7 +90,7 @@
             font-weight: 700;
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #ffa726;
             font-size: 0.9rem;
         }
 
@@ -107,7 +107,7 @@
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
             color: white;
             padding: 1.25rem;
             text-align: center;
@@ -143,13 +143,13 @@
         }
 
         .user-message .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
             color: white;
             padding: 1rem 1.25rem;
             border-radius: 20px 20px 5px 20px;
             display: inline-block;
             max-width: 75%;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 167, 38, 0.3);
             font-size: 0.95rem;
         }
 
@@ -161,7 +161,7 @@
             display: inline-block;
             max-width: 85%;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #ffa726;
             font-size: 0.95rem;
         }
 
@@ -183,7 +183,7 @@
         }
 
         .btn-send {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
             border: none;
             color: white;
             padding: 1rem 1.5rem;
@@ -192,25 +192,25 @@
 
         .btn-send:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 167, 38, 0.4);
             color: white;
         }
 
         /* Sidebar Elements */
         .upload-zone {
-            border: 2px dashed #667eea;
+            border: 2px dashed #ffa726;
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
-            background: rgba(102, 126, 234, 0.05);
+            background: rgba(255, 167, 38, 0.05);
             transition: all 0.3s ease;
             cursor: pointer;
             margin-bottom: 1rem;
         }
 
         .upload-zone:hover {
-            border-color: #764ba2;
-            background: rgba(102, 126, 234, 0.1);
+            border-color: #ff7043;
+            background: rgba(255, 167, 38, 0.1);
             transform: translateY(-2px);
         }
 
@@ -236,7 +236,7 @@
         .stat-number {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #667eea;
+            color: #ffa726;
         }
 
         .stat-label {
@@ -246,7 +246,7 @@
         }
 
         .tips-section {
-            background: rgba(102, 126, 234, 0.1);
+            background: rgba(255, 167, 38, 0.1);
             border-radius: 10px;
             padding: 1rem;
             margin-top: 1rem;
@@ -263,22 +263,22 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: #e3f2fd;
-            color: #1976d2;
+            background: #fff3e0;
+            color: #f57722;
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
             text-decoration: none;
             font-size: 0.9rem;
             margin: 0.25rem;
             transition: all 0.3s ease;
-            border: 1px solid #bbdefb;
+            border: 1px solid #ffcc80;
         }
 
         .pdf-reference:hover {
-            background: #1976d2;
+            background: #f57722;
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+            box-shadow: 0 4px 12px rgba(245, 119, 34, 0.3);
             text-decoration: none;
         }
 
@@ -307,7 +307,7 @@
         }
 
         .pdf-modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ffa726 0%, #ff7043 100%);
             color: white;
             padding: 1rem;
             border-radius: 15px 15px 0 0;
@@ -365,7 +365,7 @@
         }
 
         .page-controls button {
-            background: #667eea;
+            background: #ffa726;
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -376,7 +376,7 @@
         }
 
         .page-controls button:hover:not(:disabled) {
-            background: #764ba2;
+            background: #ff7043;
         }
 
         .page-controls button:disabled {
@@ -394,7 +394,7 @@
             width: 20px;
             height: 20px;
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid #ffa726;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-right: 0.5rem;
@@ -460,7 +460,7 @@
     <!-- Top Navigation Bar -->
     <div class="top-navbar">
         <div class="brand">
-            <i class="fas fa-hammer"></i> Material Specifications Assistant
+            <i class="fas fa-bolt"></i> Electrical Specifications Assistant
         </div>
         <div class="user-section">
             <div class="user-greeting">
@@ -479,11 +479,11 @@
             <!-- File Upload Section -->
             <h6><i class="fas fa-cloud-upload-alt"></i> Document Upload</h6>
             <div class="upload-zone" id="uploadZone">
-                <i class="fas fa-file-pdf fa-2x text-primary mb-2"></i>
+                <i class="fas fa-file-pdf fa-2x text-warning mb-2"></i>
                 <p class="mb-1"><strong>Drag & drop files</strong></p>
                 <p class="small text-muted mb-2">PDF, PNG, JPG supported</p>
                 <input type="file" id="fileInput" class="d-none" accept=".pdf,.png,.jpg,.jpeg" multiple>
-                <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('fileInput').click()">
+                <button class="btn btn-outline-warning btn-sm" onclick="document.getElementById('fileInput').click()">
                     <i class="fas fa-folder-open"></i> Browse
                 </button>
             </div>
@@ -509,37 +509,37 @@
             <!-- Quick Tips -->
             <h6><i class="fas fa-lightbulb"></i> Quick Tips</h6>
             <div class="tips-section">
-                <p><strong>📄 Upload PDFs</strong> for precise page references</p>
-                <p><strong>🔍 Ask specific questions</strong> about materials and standards</p>
+                <p><strong>⚡ Upload electrical PDFs</strong> for detailed specifications</p>
+                <p><strong>🔌 Ask about components</strong> and their ratings</p>
                 <p><strong>📊 Click PDF links</strong> to view documents directly</p>
             </div>
 
             <!-- Workspace Switch -->
             <h6><i class="fas fa-exchange-alt"></i> Switch Workspace</h6>
-            <a href="/electrical" class="btn btn-outline-warning btn-sm w-100">
-                <i class="fas fa-bolt"></i> Electrical Specifications
+            <a href="/" class="btn btn-outline-primary btn-sm w-100">
+                <i class="fas fa-hammer"></i> Material Specifications
             </a>
         </div>
 
         <!-- Chat Area -->
         <div class="chat-area">
             <div class="chat-header">
-                <i class="fas fa-robot"></i> Material Specification Expert Assistant
-                <div class="small mt-1">Ask about materials, standards, specifications, and compliance requirements</div>
+                <i class="fas fa-robot"></i> Electrical Specification Expert Assistant
+                <div class="small mt-1">Ask about electrical components, systems, standards, and safety requirements</div>
             </div>
             
             <div class="chat-messages" id="chatMessages">
                 <div class="message bot-message">
                     <div class="message-content">
-                        <h6><i class="fas fa-wave-square"></i> Welcome! I'm your Material Specification Assistant</h6>
-                        <p>I'm here to help you with material specifications. Upload your PDF documents and ask me anything about:</p>
+                        <h6><i class="fas fa-wave-square"></i> Welcome! I'm your Electrical Specification Assistant</h6>
+                        <p>I'm here to help you with electrical engineering and specifications. Upload your PDF documents and ask me anything about:</p>
                         <ul>
-                            <li><strong>Material Properties:</strong> Chemical composition, mechanical properties, thermal characteristics</li>
-                            <li><strong>Standards & Specifications:</strong> ASTM, ISO, DIN, JIS, and other international standards</li>
-                            <li><strong>Compliance Requirements:</strong> Certification processes and regulatory compliance</li>
-                            <li><strong>Material Selection:</strong> Recommendations based on application requirements</li>
+                            <li><strong>Electrical Components:</strong> Circuit breakers, transformers, motors, controls, and more</li>
+                            <li><strong>Ratings & Specifications:</strong> Voltage, current, power ratings, and environmental specifications</li>
+                            <li><strong>Safety Standards:</strong> IEC, IEEE, NEMA, UL, and other electrical safety standards</li>
+                            <li><strong>System Design:</strong> Power distribution, control systems, and electrical installations</li>
                         </ul>
-                        <div class="alert alert-info mt-3 mb-0">
+                        <div class="alert alert-warning mt-3 mb-0">
                             <i class="fas fa-info-circle"></i> <strong>Enhanced Feature:</strong> All responses include specific page references! Click on PDF links to view documents directly.
                         </div>
                     </div>
@@ -549,7 +549,7 @@
             <div class="chat-input-container">
                 <div class="input-group">
                     <input type="text" class="form-control" id="messageInput" 
-                           placeholder="Ask about material specifications, standards, or properties..." 
+                           placeholder="Ask about electrical specifications, components, or safety standards..." 
                            maxlength="500">
                     <button class="btn btn-send" type="button" id="sendButton">
                         <i class="fas fa-paper-plane"></i>
@@ -567,7 +567,7 @@
         </div>
     </div>
 
-    <!-- PDF Viewer Modal -->
+    <!-- PDF Viewer Modal (same structure as material template) -->
     <div id="pdfModal" class="pdf-modal">
         <div class="pdf-modal-content">
             <div class="pdf-modal-header">
@@ -609,12 +609,12 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts (same JavaScript as material template but with electrical endpoints) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // Global variables
-        let sessionId = 'session_' + Date.now();
+        let sessionId = 'electrical_session_' + Date.now();
         let currentPDF = null;
         let currentPage = 1;
         let totalPages = 0;
@@ -698,8 +698,8 @@
             
             const startTime = Date.now();
 
-            // Send to backend
-            fetch('/chat', {
+            // Send to electrical backend
+            fetch('/electrical/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -759,7 +759,7 @@
             typingDiv.innerHTML = `
                 <div class="message-content">
                     <div class="loading-spinner"></div>
-                    Analyzing your query...
+                    Analyzing your electrical query...
                 </div>
             `;
             chatMessages.appendChild(typingDiv);
@@ -777,7 +777,7 @@
             document.getElementById('responseTimer').textContent = text;
         }
 
-        // File Upload Functions
+        // File Upload Functions (same as material template)
         function handleDragOver(e) {
             e.preventDefault();
             e.currentTarget.classList.add('dragover');
@@ -817,7 +817,7 @@
 
             showUploadStatus(`Uploading ${file.name}...`, 'info');
 
-            fetch('/upload', {
+            fetch('/electrical/upload', {
                 method: 'POST',
                 body: formData
             })
@@ -857,7 +857,7 @@
         }
 
         function loadStats() {
-            fetch('/api/stats')
+            fetch('/api/electrical/stats')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('totalConversations').textContent = data.total_conversations || 0;
@@ -869,7 +869,7 @@
                 });
         }
 
-        // PDF Viewer Functions
+        // PDF Viewer Functions (same as material template)
         function openPDFViewer(filename, pageNumber = 1) {
             const modal = document.getElementById('pdfModal');
             const title = document.getElementById('pdfTitle');

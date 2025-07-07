@@ -28,7 +28,7 @@ from PIL import Image
 import json
 import numpy as np
 import re
-from flask import Flask, request, jsonify, render_template, url_for, redirect, session, flash, send_from_directory
+from flask import Flask, request, jsonify, render_template, url_for, redirect, session, flash, send_from_directory, send_file, abort
 from markupsafe import Markup
 from flask_cors import CORS
 
@@ -43,6 +43,7 @@ from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.prompts import PromptTemplate
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain.schema import Document
 
 # Import markdown renderer with FIXED preset
 try:
@@ -91,10 +92,19 @@ ELECTRICAL_CHAT_LOGS_CSV = 'user_data/electrical_chat_logs.csv'
 
 def md_to_html(text: str) -> str:
     """
-    Convert chatbot Markdown (supports tables) to sanitized HTML.
+    Convert chatbot Markdown (supports tables) to sanitized HTML with PDF references.
     """
+    # FIXED: Ensure text is a string before processing
+    if not isinstance(text, str):
+        if isinstance(text, dict):
+            text = text.get('result', str(text))
+        else:
+            text = str(text)
+    
     if MARKDOWN_AVAILABLE:
         try:
+            # Process PDF references before markdown conversion
+            text = process_pdf_references(text)
             html_content = md.render(text)
             return Markup(html_content)  # Mark as safe HTML
         except Exception as e:
@@ -104,10 +114,36 @@ def md_to_html(text: str) -> str:
         # Fallback: basic manual conversion if markdown-it-py not available
         return Markup(basic_markdown_to_html(text))
 
+def process_pdf_references(text: str) -> str:
+    """
+    Process PDF references in text and convert them to clickable links.
+    """
+    # FIXED: Ensure text is a string
+    if not isinstance(text, str):
+        text = str(text)
+    
+    # Pattern to match PDF references like [Source: filename.pdf, Page: 5]
+    pdf_pattern = r'\[Source:\s*([^,]+\.pdf),\s*Page:\s*(\d+)\]'
+    
+    def replace_pdf_ref(match):
+        filename = match.group(1).strip()
+        page_num = match.group(2)
+        # Create a clickable link that opens the PDF viewer
+        return f'<a href="#" class="pdf-reference" data-filename="{filename}" data-page="{page_num}" onclick="openPDFViewer(\'{filename}\', {page_num})">📄 {filename} (Page {page_num})</a>'
+    
+    return re.sub(pdf_pattern, replace_pdf_ref, text)
+
 def basic_markdown_to_html(text: str) -> str:
     """
     Enhanced fallback markdown to HTML converter for tables and formatting
     """
+    # FIXED: Ensure text is a string
+    if not isinstance(text, str):
+        text = str(text)
+    
+    # Process PDF references first
+    text = process_pdf_references(text)
+    
     # Convert headers first
     text = re.sub(r'^## (.*$)', r'<h2 style="color: #333; margin: 1.5rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid #667eea;">\1</h2>', text, flags=re.MULTILINE)
     text = re.sub(r'^### (.*$)', r'<h3 style="color: #495057; margin: 1.2rem 0 0.8rem 0;">\1</h3>', text, flags=re.MULTILINE)
@@ -226,6 +262,77 @@ def convert_table_to_html(table_lines):
     html += '</tbody></table>'
     
     return html
+
+# Custom PDF Loader with Enhanced Metadata
+class CustomPyPDFLoader:
+    """Custom PDF loader that preserves page metadata with 1-based indexing"""
+    
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+        
+    def load_and_split(self, text_splitter=None):
+        """Load PDF and split while preserving page metadata"""
+        if text_splitter is None:
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=500, 
+                chunk_overlap=50
+            )
+        
+        documents = []
+        filename = os.path.basename(self.file_path)
+        
+        try:
+            # Use PyMuPDF for better text extraction and metadata
+            doc = fitz.open(self.file_path)
+            
+            for page_num in range(len(doc)):
+                page = doc[page_num]
+                text = page.get_text()
+                
+                if text.strip():  # Only process pages with text
+                    # Create document with enhanced metadata
+                    page_doc = Document(
+                        page_content=text,
+                        metadata={
+                            "source": filename,
+                            "page": page_num + 1,  # 1-based page numbering
+                            "file_path": self.file_path,
+                            "total_pages": len(doc)
+                        }
+                    )
+                    
+                    # Split the page into chunks while preserving metadata
+                    chunks = text_splitter.split_documents([page_doc])
+                    
+                    # Ensure each chunk retains the page metadata
+                    for chunk in chunks:
+                        chunk.metadata.update({
+                            "source": filename,
+                            "page": page_num + 1,
+                            "file_path": self.file_path,
+                            "total_pages": len(doc)
+                        })
+                    
+                    documents.extend(chunks)
+            
+            doc.close()
+            
+        except Exception as e:
+            print(f"Error loading PDF {self.file_path}: {e}")
+            # Fallback to regular PyPDFLoader if PyMuPDF fails
+            loader = PyPDFLoader(self.file_path)
+            docs = loader.load_and_split(text_splitter)
+            
+            # Fix metadata for fallback
+            for doc in docs:
+                if 'page' in doc.metadata:
+                    doc.metadata['page'] = doc.metadata['page'] + 1  # Convert to 1-based
+                doc.metadata['source'] = filename
+                doc.metadata['file_path'] = self.file_path
+            
+            documents.extend(docs)
+        
+        return documents
 
 def init_csv_files():
     """Initialize CSV files with proper encoding"""
@@ -477,25 +584,21 @@ def get_enhanced_prompt_template():
 - Use code blocks (```
 - Create tables when comparing materials or specifications using proper markdown table syntax
 - Use numbered lists (1., 2., 3.) for procedures and processes
-
-**TABLE FORMAT EXAMPLE:**
-| Material | Grade | Tensile Strength | Application |
-|----------|-------|------------------|-------------|
-| Steel | ASTM A36 | 400-550 MPa | Structural |
-| Aluminum | 6061-T6 | 310 MPa | Aerospace |
+- ALWAYS include source references with page numbers in the format: [Source: filename.pdf, Page: X]
 
 **CONTENT GUIDELINES:**
 1. Only answer questions about material specifications, procurement, and supply chain management
 2. If asked about other topics, respond: "## I specialize in material specifications\\n\\nI focus on material identification and procurement. How can I help you with material-related inquiries?"
 3. Help identify materials based on descriptions, specifications, grades, and standards
 4. Provide information about material properties, certifications, and compliance requirements
+5. Always cite your sources with specific page numbers when referencing documents
 
 Use this context to provide accurate material information:
 {context}
 
 Question: {question}
 
-**Expert Material Specification Answer (in markdown format):**'''
+**Expert Material Specification Answer (in markdown format with source citations):**'''
 
 def get_electrical_prompt_template():
     return '''You are an electrical specification identification expert assistant.
@@ -508,12 +611,7 @@ def get_electrical_prompt_template():
 - Use code blocks (```) for electrical standards and specifications
 - Create tables when comparing electrical components or specifications using proper markdown table syntax
 - Use numbered lists (1., 2., 3.) for procedures and processes
-
-**TABLE FORMAT EXAMPLE:**
-| Component | Rating | Standard | Application |
-|-----------|--------|----------|-------------|
-| Circuit Breaker | 480V, 100A | IEC 60947 | Motor Control |
-| Transformer | 11kV/480V | IEEE C57 | Distribution |
+- ALWAYS include source references with page numbers in the format: [Source: filename.pdf, Page: X]
 
 **CONTENT GUIDELINES:**
 1. Only answer questions about electrical specifications, electrical engineering, power systems, and electrical safety
@@ -521,23 +619,61 @@ def get_electrical_prompt_template():
 3. Help identify electrical components based on descriptions, specifications, ratings, and standards
 4. Provide information about electrical properties, safety requirements, and compliance standards
 5. Support electrical system design, power calculations, and equipment selection
+6. Always cite your sources with specific page numbers when referencing documents
 
 Use this context to provide accurate electrical information:
 {context}
 
 Question: {question}
 
-**Expert Electrical Specification Answer (in markdown format):**'''
+**Expert Electrical Specification Answer (in markdown format with source citations):**'''
+
+# FIXED: Custom RetrievalQA class that uses the new LangChain API
+class MetadataRetrievalQA(RetrievalQA):
+    """Custom RetrievalQA that includes source metadata in responses"""
+    
+    def _get_docs(self, question: str, *, run_manager=None):
+        """Get docs and prepare them with metadata information using the new API"""
+        try:
+            # FIXED: Use the new invoke method instead of deprecated get_relevant_documents
+            docs = self.retriever.invoke(question)
+            
+            # Handle case where invoke returns different structure
+            if isinstance(docs, dict):
+                docs = docs.get('documents', [])
+            
+            # Enhance context with metadata
+            enhanced_docs = []
+            for doc in docs:
+                enhanced_content = doc.page_content
+                if 'source' in doc.metadata and 'page' in doc.metadata:
+                    enhanced_content += f"\n[Source: {doc.metadata['source']}, Page: {doc.metadata['page']}]"
+                enhanced_docs.append(Document(page_content=enhanced_content, metadata=doc.metadata))
+            
+            return enhanced_docs
+            
+        except Exception as e:
+            print(f"Error in _get_docs: {e}")
+            # Fallback to basic retrieval if new API fails
+            try:
+                docs = self.retriever.get_relevant_documents(question)
+                return docs
+            except Exception as e2:
+                print(f"Fallback also failed: {e2}")
+                return []
 
 def initialize_components():
     try:
         documents = []
         
-        # Load PDF files
+        # Load PDF files with custom loader
         try:
-            pdf_loader = DirectoryLoader("data", glob="*.pdf", loader_cls=PyPDFLoader, silent_errors=True)
-            pdf_docs = pdf_loader.load()
-            documents.extend(pdf_docs)
+            import glob
+            pdf_files = glob.glob("data/*.pdf")
+            for pdf_file in pdf_files:
+                loader = CustomPyPDFLoader(pdf_file)
+                pdf_docs = loader.load_and_split()
+                documents.extend(pdf_docs)
         except Exception as e:
             print(f"Warning: Could not load PDF files: {e}")
 
@@ -560,7 +696,6 @@ def initialize_components():
         # If no documents loaded, create a fallback
         if not documents:
             print("Warning: No documents found in data directory")
-            from langchain.schema import Document
             documents = [Document(page_content="Material specification database", metadata={"source": "fallback"})]
 
         # Process documents
@@ -574,41 +709,57 @@ def initialize_components():
             encode_kwargs={'normalize_embeddings': False}
         )
 
-        # Create ChromaDB with telemetry completely disabled
-        import chromadb
-        from chromadb.config import Settings
-
-        chroma_settings = Settings(
-            anonymized_telemetry=False,
-            allow_reset=True,
-            persist_directory="./chroma_db_material"
-        )
-
-        vector_db = Chroma.from_documents(
-            texts,
-            embeddings,
-            persist_directory="./chroma_db_material",
-            client_settings=chroma_settings
-        )
+        # FIXED: Create ChromaDB with proper settings to avoid telemetry issues
+        try:
+            import chromadb
+            from chromadb.config import Settings
+            
+            # Create client with telemetry disabled
+            client = chromadb.PersistentClient(
+                path="./chroma_db_material",
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+            
+            vector_db = Chroma(
+                client=client,
+                embedding_function=embeddings,
+                collection_name="material_docs"
+            )
+            
+            # Add documents to the vector store
+            vector_db.add_documents(texts)
+            
+        except Exception as e:
+            print(f"Error with new ChromaDB approach: {e}")
+            # Fallback to old approach
+            vector_db = Chroma.from_documents(
+                texts,
+                embeddings,
+                persist_directory="./chroma_db_material"
+            )
 
         # Create LLM
         llm = ChatGroq(
             temperature=0,
-            groq_api_key="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",
+            groq_api_key="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",
             model_name="llama-3.3-70b-versatile"
         )
 
-        # ENHANCED PROMPT WITH MARKDOWN FORMATTING
+        # ENHANCED PROMPT WITH MARKDOWN FORMATTING AND SOURCE CITATIONS
         PROMPT = PromptTemplate(
             template=get_enhanced_prompt_template(),
             input_variables=["context", "question"]
         )
 
-        return RetrievalQA.from_chain_type(
+        return MetadataRetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
             retriever=vector_db.as_retriever(),
-            chain_type_kwargs={"prompt": PROMPT}
+            chain_type_kwargs={"prompt": PROMPT},
+            return_source_documents=True
         )
 
     except Exception as e:
@@ -619,11 +770,14 @@ def initialize_electrical_components():
     try:
         documents = []
         
-        # Load electrical PDF files
+        # Load electrical PDF files with custom loader
         try:
-            pdf_loader = DirectoryLoader("electrical_data", glob="*.pdf", loader_cls=PyPDFLoader, silent_errors=True)
-            pdf_docs = pdf_loader.load()
-            documents.extend(pdf_docs)
+            import glob
+            pdf_files = glob.glob("electrical_data/*.pdf")
+            for pdf_file in pdf_files:
+                loader = CustomPyPDFLoader(pdf_file)
+                pdf_docs = loader.load_and_split()
+                documents.extend(pdf_docs)
         except Exception as e:
             print(f"Warning: Could not load electrical PDF files: {e}")
 
@@ -646,7 +800,6 @@ def initialize_electrical_components():
         # If no documents loaded, create a fallback
         if not documents:
             print("Warning: No electrical documents found in electrical_data directory")
-            from langchain.schema import Document
             documents = [Document(page_content="Electrical specification database", metadata={"source": "electrical_fallback"})]
 
         # Process documents
@@ -660,41 +813,57 @@ def initialize_electrical_components():
             encode_kwargs={'normalize_embeddings': False}
         )
 
-        # Create ChromaDB with telemetry completely disabled
-        import chromadb
-        from chromadb.config import Settings
-
-        chroma_settings = Settings(
-            anonymized_telemetry=False,
-            allow_reset=True,
-            persist_directory="./chroma_db_electrical"
-        )
-
-        vector_db = Chroma.from_documents(
-            texts,
-            embeddings,
-            persist_directory="./chroma_db_electrical",
-            client_settings=chroma_settings
-        )
+        # FIXED: Create ChromaDB with proper settings to avoid telemetry issues
+        try:
+            import chromadb
+            from chromadb.config import Settings
+            
+            # Create client with telemetry disabled
+            client = chromadb.PersistentClient(
+                path="./chroma_db_electrical",
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
+            )
+            
+            vector_db = Chroma(
+                client=client,
+                embedding_function=embeddings,
+                collection_name="electrical_docs"
+            )
+            
+            # Add documents to the vector store
+            vector_db.add_documents(texts)
+            
+        except Exception as e:
+            print(f"Error with new ChromaDB approach: {e}")
+            # Fallback to old approach
+            vector_db = Chroma.from_documents(
+                texts,
+                embeddings,
+                persist_directory="./chroma_db_electrical"
+            )
 
         # Create LLM (same API key)
         llm = ChatGroq(
             temperature=0,
-            groq_api_key="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",
+            groq_api_key="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",
             model_name="llama-3.3-70b-versatile"
         )
 
-        # ELECTRICAL PROMPT WITH MARKDOWN FORMATTING
+        # ELECTRICAL PROMPT WITH MARKDOWN FORMATTING AND SOURCE CITATIONS
         PROMPT = PromptTemplate(
             template=get_electrical_prompt_template(),
             input_variables=["context", "question"]
         )
 
-        return RetrievalQA.from_chain_type(
+        return MetadataRetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
             retriever=vector_db.as_retriever(),
-            chain_type_kwargs={"prompt": PROMPT}
+            chain_type_kwargs={"prompt": PROMPT},
+            return_source_documents=True
         )
 
     except Exception as e:
@@ -702,12 +871,18 @@ def initialize_electrical_components():
         return None
 
 def validate_response(response):
-    if isinstance(response, dict) and "result" in response:
-        result = response["result"]
-    elif isinstance(response, dict):
-        result = str(response)
+    """FIXED: Properly handle dict/string response validation"""
+    if isinstance(response, dict):
+        if "result" in response:
+            result = response["result"]
+        else:
+            result = str(response)
     else:
         result = str(response)
+    
+    # Ensure we have a string result
+    if not isinstance(result, str):
+        result = str(result)
     
     if not result or not result.strip():
         result = "Sorry, I couldn't generate a valid answer. Please try again."
@@ -831,6 +1006,38 @@ def logout():
 @login_required
 def index():
     return render_template('material_index.html')
+
+@app.route('/electrical')
+@login_required
+def electrical_index():
+    return render_template('electrical_index.html')
+
+# PDF Serving Routes
+@app.route('/pdf/<path:filename>')
+@login_required
+def serve_pdf(filename):
+    """Serve PDF files from data directories"""
+    # Check in material data directory first
+    pdf_path = os.path.join('data', filename)
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, as_attachment=False, mimetype='application/pdf')
+    
+    # Check in electrical data directory
+    pdf_path = os.path.join('electrical_data', filename)
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, as_attachment=False, mimetype='application/pdf')
+    
+    # Check in uploaded PDFs
+    pdf_path = os.path.join(PDF_FOLDER, filename)
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, as_attachment=False, mimetype='application/pdf')
+    
+    # Check in electrical uploaded PDFs
+    pdf_path = os.path.join(ELECTRICAL_PDF_FOLDER, filename)
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, as_attachment=False, mimetype='application/pdf')
+    
+    abort(404)
 
 @app.route('/upload', methods=['POST'])
 @login_required
@@ -974,6 +1181,7 @@ def chat():
             conn.close()
 
         if qa_chain:
+            # FIXED: Use proper invoke method and handle response correctly
             result = qa_chain.invoke({"query": user_message})
             raw_bot_response = validate_response(result)
             # Convert markdown to HTML with proper Flask Markup
@@ -1035,6 +1243,7 @@ def electrical_chat():
             conn.close()
 
         if electrical_qa_chain:
+            # FIXED: Use proper invoke method and handle response correctly
             result = electrical_qa_chain.invoke({"query": user_message})
             raw_bot_response = validate_response(result)
             # Convert markdown to HTML with proper Flask Markup
@@ -1179,5 +1388,6 @@ if __name__ == "__main__":
     print("🤖 LangChain + Groq + Chroma pipeline ready for specifications")
     print("⚡ Electrical workspace enabled with separate data handling")
     print("📋 Professional table rendering enabled with enhanced styling")
+    print("📄 PDF page references and viewer enabled")
     print("🌐 Server running on http://localhost:5000")
     app.run(host="0.0.0.0", port=5000, debug=True)
